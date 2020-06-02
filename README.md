@@ -1,4 +1,4 @@
-# Bluetooth
+# Bluetooth [WIP]
 STM32 Bluetooth Audio Player
 
 This repository documents my work designing, building, programming, and testing a Bluetooth audio player. Some of this log has been written retroactively, but I try to capture my thoughts at the time. 
@@ -58,7 +58,7 @@ The design of the battery charging circuit is based off of the Application Note 
 ### Schematic
 
 The finalized schematic:
-![Finalized Schematic](/Schematic.png)
+![Finalized Schematic](/Images/Schematic.png)
 
 
 STM32CoreMX was used to simplify STM32 pin selections during the schematic design.
@@ -66,7 +66,7 @@ STM32CoreMX was used to simplify STM32 pin selections during the schematic desig
 ### PCB
 
 The finalized PCB layout:
-![Finalized PCB Layout](/PCB.png)
+![Finalized PCB Layout](/Images/PCB.png)
 
 The layout is not ideal as there are some larger loops, and my high frequency lines do alternate between layers, but when doing the layout I determined that this would likely not be an issue. This is because the majority of the traces are DC signals and the highest frequency lines are my I2S clock and SD SPI clock lines. The I2S clock runs at about 3 MHz and the SPI clock runs at about 4 MHz. 
 
@@ -79,14 +79,14 @@ A 2-layer PCB was used in order to save cost, but a 4-layer board may have resul
 The unassembled PCB:
 PCB Top | PCB Bottom
 --------|-----------
-![Finalized PCB Layout](/PCB_TOP.jpg) | ![Finalized PCB Layout](/PCB_BOTTOM.jpg)
+![Finalized PCB Layout](/Images/PCB_TOP.jpg) | ![Finalized PCB Layout](/Images/PCB_BOTTOM.jpg)
 
 At the time of assembly, the only lab equipment I had was a soldering iron with various tips, a set of "Helping Hands", a magnifying glass, a handheld multimeter, and flux, solder, wire, etc. (Since then I have upgraded my home lab to have a proper work area along with a 5-20x stereo microscope, 4-channel 100MHz oscilloscope, variable power supply, various fine tools etc.)
 
 The assembled PCB:
 PCB Top | PCB Bottom
 --------|-----------
-![Finalized PCB Layout](/Assembled_PCB_Top.jpg) | ![Finalized PCB Layout](/Assembled_PCB.jpg)
+![Finalized PCB Layout](/Images/Assembled_PCB_Top.jpg) | ![Finalized PCB Layout](/Images/Assembled_PCB.jpg)
 
 Given the tools available at the time I am satisfied with the quality of the assembled PCB.
 
@@ -100,9 +100,6 @@ A significant drawback to the requirement to keep the total cost under $75 was t
 As stated earlier, STM32CubeMX was used to assist with pin selection. This also allowed for easy configuration of the clock and peripherals and generation of the initial code. 
 
 As programming began, an effort was made to utilize the HAL drivers as much as possible, however in many cases (especially early on in the program) it was easier or faster (from a code execution perspective) to interact with the registers directly. This had the added benefit of giving me a much better understanding of the environment versus if I only used the HAL drivers.
-
-The outline for the program is shown below:
-High Level Initial Block Diagram:
 
 Data is stored on the SD card. It is read via SPI1 using DMA in order to reduce processor load. FatFs is used to handle the file reads. Data is read into a buffer with an upper and a lower half. This data is then sent over I2S using DMA to the BC127. The upper half of the buffer is filled while the lower half is being sent and vice versa. 
 
