@@ -307,4 +307,6 @@ void previousSong(void)
 void selectSong(void)
 {
 	memcpy(WAVfile.fileName,(songList + currentSong),12);
+	HAL_UART_Transmit(&huart1,(uint8_t*) (songList + currentSong),12,1000);
+	HAL_UART_Transmit(&huart1,(uint8_t*)"\r\n",2,1000);
 }

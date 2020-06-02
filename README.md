@@ -1,7 +1,7 @@
 # Bluetooth [WIP]
 STM32 Bluetooth Audio Player
 
-This repository documents my work designing, building, programming, and testing a Bluetooth audio player. Some of this log has been written retroactively, but I try to capture my thoughts at the time. 
+This repository documents my work designing, building, programming, and testing a Bluetooth audio player. Some of this log has been written retroactively, but I try to capture what my thoughts were at the time. 
 
 ## Motivation:
 This project started as a request from a friend. He asked if I could make a music player that he could wear as a watch and stream to Bluetooth headphones. I had done some work before with FPGAs using SD cards so I was familiar with the protocol. I determined that this would be challenging enough to be a) fun, and b) educational, while still being possible/practical given my skills and equipment.

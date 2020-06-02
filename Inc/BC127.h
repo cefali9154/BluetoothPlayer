@@ -39,6 +39,7 @@ typedef enum {
 	NOT_CONNECTED,
 	CONNECTED,
 	PLAYING,
+	END_OF_FILE,
 	NOT_PLAYING
 }bc127Status_e;
 

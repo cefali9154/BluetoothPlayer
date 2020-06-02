@@ -97,7 +97,7 @@ void loadFileState(void)
 }
 
 void idleState(void)
-{
+{/*check BC127status and see if we were playing or paused*/
 	if(oneshotBTNs & S1_Pin){
 		runStates = previousSongState;
 	}
@@ -115,17 +115,19 @@ void idleState(void)
 void previousSongState(void)
 {
 	previousSong();
+	runStates = loadFileState;
 }
 
 void nextSongState(void)
 {
 	nextSong();
+	runStates = loadFileState;
 }
 
 void playSongState(void)
-{
-	streamAudioFile(&FatFsFile,&WAVfile);
-
+{ /*check BC127status and see if we were playing or paused*/
+	streamAudioFile(&FatFsFile,&WAVfile); /*TODO add end of file handling*/
+	/*add handling for if BT device is disconnected*/
 	if(oneshotBTNs){
 		if(oneshotBTNs & S1_Pin){
 			runStates = previousSongState;
