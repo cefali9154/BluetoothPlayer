@@ -58,7 +58,7 @@ The design of the battery charging circuit is based off of the Application Note 
 ### Schematic
 
 The finalized schematic:
-![Finalized Schematic](/Schematic.png)
+![Finalized Schematic](/Images/Schematic.png)
 
 
 STM32CoreMX was used to simplify STM32 pin selections during the schematic design.
@@ -66,7 +66,7 @@ STM32CoreMX was used to simplify STM32 pin selections during the schematic desig
 ### PCB
 
 The finalized PCB layout:
-![Finalized PCB Layout](/PCB.png)
+![Finalized PCB Layout](/Images/PCB.png)
 
 The layout is not ideal as there are some larger loops, and my high frequency lines do alternate between layers, but when doing the layout I determined that this would likely not be an issue. This is because the majority of the traces are DC signals and the highest frequency lines are my I2S clock and SD SPI clock lines. The I2S clock runs at about 3 MHz and the SPI clock runs at about 4 MHz. 
 
@@ -79,14 +79,14 @@ A 2-layer PCB was used in order to save cost, but a 4-layer board may have resul
 The unassembled PCB:
 PCB Top | PCB Bottom
 --------|-----------
-![Finalized PCB Layout](/PCB_TOP.jpg) | ![Finalized PCB Layout](/PCB_BOTTOM.jpg)
+![Finalized PCB Layout](/Images/PCB_TOP.jpg) | ![Finalized PCB Layout](/Images/PCB_BOTTOM.jpg)
 
 At the time of assembly, the only lab equipment I had was a soldering iron with various tips, a set of "Helping Hands", a magnifying glass, a handheld multimeter, and flux, solder, wire, etc. (Since then I have upgraded my home lab to have a proper work area along with a 5-20x stereo microscope, 4-channel 100MHz oscilloscope, variable power supply, various fine tools etc.)
 
 The assembled PCB:
 PCB Top | PCB Bottom
 --------|-----------
-![Finalized PCB Layout](/Assembled_PCB_Top.jpg) | ![Finalized PCB Layout](/Assembled_PCB.jpg)
+![Finalized PCB Layout](/Images/Assembled_PCB_Top.jpg) | ![Finalized PCB Layout](/Images/Assembled_PCB.jpg)
 
 Given the tools available at the time I am satisfied with the quality of the assembled PCB.
 
