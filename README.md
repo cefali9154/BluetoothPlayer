@@ -101,9 +101,6 @@ As stated earlier, STM32CubeMX was used to assist with pin selection. This also 
 
 As programming began, an effort was made to utilize the HAL drivers as much as possible, however in many cases (especially early on in the program) it was easier or faster (from a code execution perspective) to interact with the registers directly. This had the added benefit of giving me a much better understanding of the environment versus if I only used the HAL drivers.
 
-The outline for the program is shown below:
-High Level Initial Block Diagram:
-
 Data is stored on the SD card. It is read via SPI1 using DMA in order to reduce processor load. FatFs is used to handle the file reads. Data is read into a buffer with an upper and a lower half. This data is then sent over I2S using DMA to the BC127. The upper half of the buffer is filled while the lower half is being sent and vice versa. 
 
 The BC127 is controlled via UART. The STM32 send and receives commands or notifications over UART2. In order to support configuration and debugging, this UART2 is mirrored to UART1. UART1 interfaces with a PC for terminal (PuTTY) display and control.
