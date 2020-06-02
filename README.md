@@ -1,4 +1,4 @@
-# Bluetooth
+# Bluetooth [WIP]
 STM32 Bluetooth Audio Player
 
 This repository documents my work designing, building, programming, and testing a Bluetooth audio player. Some of this log has been written retroactively, but I try to capture my thoughts at the time. 
