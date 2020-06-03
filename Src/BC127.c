@@ -15,14 +15,7 @@
 static char bc127Data[100];
 static uint8_t bcDataFlag;
 
-bc127Device_t bc127Device;
-
-bc127Notification_e Notification = INIT_STATE;
-bc127Status_e Status = NOT_READY;
-
-
-
-void bc127SendCommand(enum bc127Command_e command)
+void bc127SendCommand(bc127Device_t *bc127, enum bc127Command_e command)
 {
 	switch(command){
 		case BLANK:
@@ -36,7 +29,7 @@ void bc127SendCommand(enum bc127Command_e command)
 			break;
 		case PAIR:
 			HAL_UART_Transmit(&huart2,(uint8_t*)"OPEN ",5,1000);
-			HAL_UART_Transmit(&huart2,(uint8_t*)bc127Device.bluetoothAddress,12,1000);
+			HAL_UART_Transmit(&huart2,(uint8_t*)bc127->bluetoothAddress,12,1000);
 			HAL_UART_Transmit(&huart2,(uint8_t*)" A2DP\r",6,1000);
 			break;
 		case PAIR_MODE:
@@ -48,49 +41,52 @@ void bc127SendCommand(enum bc127Command_e command)
 	}
 }
 
-void bc127Read(void)
+void bc127Read(bc127Device_t *bc127)
 {
 
 	if(bcDataFlag == DATA){;
 		/*Parse data from input*/
 		if(strncmp(bc127Data,"CHARGE_IN_PROGRESS",18) == 0){
-			bc127Device.notification = CHARGING;
+			bc127->notification = CHARGING;
+			bc127->batteryStatus = CHARGING;
 		}
 		else if(strncmp(bc127Data,"CHARGE_COMPLETE",15) == 0){
-			bc127Device.notification = CHARGED_FULL;
+			bc127->notification = CHARGED_FULL;
+			bc127->batteryStatus = CHARGED_FULL;
 		}
 		else if(strncmp(bc127Data,"CHARGER_DISABLED",16) == 0){
-			bc127Device.notification = NOT_CHARGING;
+			bc127->notification = NOT_CHARGING;
+			bc127->batteryStatus = NOT_CHARGING;
 		}
 		else if(strncmp(bc127Data,"OPEN_OK",7) == 0){
-			bc127Device.notification = A2DP_OPEN;
-			bc127Device.status = CONNECTED;
+			bc127->notification = A2DP_OPEN;
+			bc127->connectionStatus = CONNECTED;
 		}
 		else if(strncmp(bc127Data,"CLOSE_OK",8) == 0){
-			bc127Device.notification = A2DP_CLOSED;
-			bc127Device.status = NOT_CONNECTED;
+			bc127->notification = A2DP_CLOSED;
+			bc127->connectionStatus = NOT_CONNECTED;
 		}
 		else if(strncmp(bc127Data,"PAIR_ERROR",10) == 0){
-			bc127Device.notification = PAIR_ERROR;
+			bc127->notification = PAIR_ERROR;
 		}
 		else if(strncmp(bc127Data,"PAIR_OK",7) == 0){
-			bc127Device.notification = PAIR_OK;
+			bc127->notification = PAIR_OK;
 		}
 		else if(strncmp(bc127Data,"INQUIRY",7) == 0){
-			memcpy(bc127Device.bluetoothAddress,bc127Data + 8,12);
-			printf("string: %s\r\n",bc127Device.bluetoothAddress);
+			memcpy(bc127->bluetoothAddress,bc127Data + 8,12);
+			printf("string: %s\r\n",bc127->bluetoothAddress);
 		}
 		else if(strncmp(bc127Data,"INQU_OK",7) == 0){
-			bc127Device.notification = INQUIRY_OK;
+			bc127->notification = INQUIRY_OK;
 		}
 		else if(strncmp(bc127Data,"A2DP_STREAM_START",17) == 0){
-			bc127Device.status = PLAYING;
+			bc127->playStatus = PLAYING;
 		}
 		else if(strncmp(bc127Data,"A2DP_STREAM_SUSPEND",19) == 0){
-			bc127Device.status = NOT_PLAYING;
+			bc127->playStatus = NOT_PLAYING;
 		}
 		else if(strncmp(bc127Data,"Sierra",6) == 0){
-			bc127Device.status = READY;
+			bc127->connectionStatus = READY;
 		}
 		memset(bc127Data, 0, 100);
 		bcDataFlag = NO_DATA;

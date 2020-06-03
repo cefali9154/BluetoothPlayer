@@ -8,6 +8,7 @@
  */
 
 #include "AudioFile.h"
+#include "ff.h"
 
 static uint8_t dataBuffer[AUDIO_BUFFER_SIZE];
 static uint16_t bigEndianData[AUDIO_BUFFER_SIZE];
@@ -25,7 +26,6 @@ static char songList[MAX_SONG_COUNT][12]; /*we can cut this down eventually but 
  * we re-add the ".wav" we search for 0x00 in the array and start there and add the .wav after that?
  */
 static uint8_t currentSong;
-WAVaudioFile WAVfile;
 FRESULT res; //fatfs function result code
 FATFS *FatFs_Obj;
 FIL FatFsFile;
@@ -105,9 +105,9 @@ void initializeAudioFile(FIL *FatFsFile, WAVaudioFile *WAVfile)
 	  }
 }
 
-void streamAudioFile(FIL *FatFsFile, WAVaudioFile *WAVfile)
+uint8_t streamAudioFile(FIL *FatFsFile, WAVaudioFile *WAVfile)
 {
-
+	uint8_t isEndOfFile = 0;
 	uint16_t i;
 	UINT bytesRead;
 
@@ -115,7 +115,7 @@ void streamAudioFile(FIL *FatFsFile, WAVaudioFile *WAVfile)
 		  f_read(FatFsFile, &dataBuffer, AUDIO_BUFFER_SIZE, &bytesRead);
 		  updateFlag = UPDATE_NONE;
 
-		  if(WAVfile->numberOfChannels == 2){
+		  if(WAVfile->numberOfChannels == 2){ /*TODO add mono support*/
 			  for(i=0;i<(AUDIO_BUFFER_SIZE / 2);i++){
 				  bigEndianData[i] = ((int16_t) ((dataBuffer[(i * 2) + 1] << 8) | (dataBuffer[(i * 2)])) >> volShift);
 			  }
@@ -123,8 +123,9 @@ void streamAudioFile(FIL *FatFsFile, WAVaudioFile *WAVfile)
 
 		  if((bytesRead < AUDIO_BUFFER_SIZE)){ // this will cut off up to last 510 bytes. That is ok
 			  f_close(FatFsFile);
-			  HAL_I2S_DMAStop(&hi2s2);
-			  HAL_UART_Transmit(&huart2,(uint8_t*)"MUSIC 10 PAUSE\r",15,1000);
+			  //HAL_I2S_DMAStop(&hi2s2);
+			  //HAL_UART_Transmit(&huart2,(uint8_t*)"MUSIC 10 PAUSE\r",15,1000);
+			  isEndOfFile = 1;
 #ifdef DEBUG
 			  printf("close1\r\n");
 #endif
@@ -143,14 +144,16 @@ void streamAudioFile(FIL *FatFsFile, WAVaudioFile *WAVfile)
 
 		  if((bytesRead < AUDIO_BUFFER_SIZE)){ // this will cut off up to last 510 bytes. That is ok
 			  f_close(FatFsFile);
-			  HAL_I2S_DMAStop(&hi2s2);
-			  HAL_UART_Transmit(&huart2,(uint8_t*)"MUSIC 10 PAUSE\r",15,1000);
+			  //HAL_I2S_DMAStop(&hi2s2);
+			  //HAL_UART_Transmit(&huart2,(uint8_t*)"MUSIC 10 PAUSE\r",15,1000);
+			  isEndOfFile = 1;
 #ifdef DEBUG
 			  printf("close2\r\n");
 #endif
 		  }
 
 	  }
+	  return isEndOfFile;
 }
 
 void fileError(WAVaudioFile *WAVfile, enum WAVerror_e error)
@@ -291,6 +294,9 @@ void findWAVFiles(void)
 void nextSong(void)
 {
 	currentSong++;
+	if(currentSong > totalAmountOfFiles){
+		currentSong = 0;
+	}
 	if(currentSong > MAX_SONG_COUNT){
 		currentSong = 0;
 	}
@@ -299,14 +305,17 @@ void nextSong(void)
 void previousSong(void)
 {
 	currentSong--;
+	if(currentSong > totalAmountOfFiles){
+		currentSong = totalAmountOfFiles;
+	}
 	if(currentSong > MAX_SONG_COUNT){
 		currentSong = MAX_SONG_COUNT;
 	}
 }
 
-void selectSong(void)
+void selectSong(WAVaudioFile *WAVfile)
 {
-	memcpy(WAVfile.fileName,(songList + currentSong),12);
+	memcpy(WAVfile->fileName,(songList + currentSong),12);
 	HAL_UART_Transmit(&huart1,(uint8_t*) (songList + currentSong),12,1000);
 	HAL_UART_Transmit(&huart1,(uint8_t*)"\r\n",2,1000);
 }

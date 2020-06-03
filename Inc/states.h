@@ -12,22 +12,22 @@
 #include "AudioFile.h"
 #include "BC127.h"
 
-extern bc127Device_t bc127Device;
-typedef void (*Run_States)(void);
+//extern bc127Device_t bc127Device;
+typedef void (*Run_States)(WAVaudioFile *WAVfile, bc127Device_t *bc127Device);
 extern Run_States runStates;
 
 
-void initState(void);
-void waitForAutoconnState(void);
-void pairingModeState(void);
-void openA2DPState(void);
-void connectedState(void);
-void loadFileState(void);
-void idleState(void);
-void previousSongState(void);
-void nextSongState(void);
-void playSongState(void);
-void pauseSongState(void);
+void initState(WAVaudioFile *WAVfile, bc127Device_t *bc127Device);
+void waitForAutoconnState(WAVaudioFile *WAVfile, bc127Device_t *bc127Device);
+void pairingModeState(WAVaudioFile *WAVfile, bc127Device_t *bc127Device);
+void openA2DPState(WAVaudioFile *WAVfile, bc127Device_t *bc127Device);
+void connectedState(WAVaudioFile *WAVfile, bc127Device_t *bc127Device);
+void loadFileState(WAVaudioFile *WAVfile, bc127Device_t *bc127Device);
+void idleState(WAVaudioFile *WAVfile, bc127Device_t *bc127Device);
+void previousSongState(WAVaudioFile *WAVfile, bc127Device_t *bc127Device);
+void nextSongState(WAVaudioFile *WAVfile, bc127Device_t *bc127Device);
+void playSongState(WAVaudioFile *WAVfile, bc127Device_t *bc127Device);
+void pauseSongState(WAVaudioFile *WAVfile, bc127Device_t *bc127Device);
 
 
 #endif /* STATES_H_ */

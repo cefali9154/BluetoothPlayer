@@ -84,14 +84,16 @@
 /* USER CODE BEGIN PV */
 uint8_t usart1data;
 uint8_t usart2data;
-
 uint8_t bc127DataBuff[100];
 uint8_t bc127DataBuffCt = 0;
-
 uint8_t pcDataBuff[100];
 uint8_t pcDataBuffCt = 0;
-
 uint32_t initTickCount;
+WAVaudioFile WAVfile;
+bc127Device_t bc127Device;
+
+bc127Notification_e Notification = INIT_STATE;
+bc127Status_e Status = NOT_READY;
 
 /* USER CODE END PV */
 
@@ -176,7 +178,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  runStates();
+	  runStates(&WAVfile, &bc127Device);
 
 	  if(HAL_GetTick() < initTickCount + 100){
 	  HAL_TIM_PWM_Start_IT(&htim2,TIM_CHANNEL_1);
@@ -197,7 +199,7 @@ int main(void)
 
 	  usartHandler();
 	  bc127UartHandler();
-	  bc127Read();
+	  bc127Read(&bc127Device);
 	  checkButtonPresses();
   }
   /* USER CODE END 3 */
