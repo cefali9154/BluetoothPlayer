@@ -108,23 +108,15 @@ void initializeAudioFile(FIL *FatFsFile, WAVaudioFile *WAVfile)
 uint8_t streamAudioFile(FIL *FatFsFile, WAVaudioFile *WAVfile)
 {
 	uint8_t isEndOfFile = 0;
-	uint16_t i;
 	UINT bytesRead;
 
 	  if(updateFlag == UPDATE_LOWER){ //fill lower half of the circular buffer
 		  f_read(FatFsFile, &dataBuffer, AUDIO_BUFFER_SIZE, &bytesRead);
+		  fillAudioBuffer(updateFlag, WAVfile);
 		  updateFlag = UPDATE_NONE;
-
-		  if(WAVfile->numberOfChannels == 2){ /*TODO add mono support*/
-			  for(i=0;i<(AUDIO_BUFFER_SIZE / 2);i++){
-				  bigEndianData[i] = ((int16_t) ((dataBuffer[(i * 2) + 1] << 8) | (dataBuffer[(i * 2)])) >> volShift);
-			  }
-		  }
 
 		  if((bytesRead < AUDIO_BUFFER_SIZE)){ // this will cut off up to last 510 bytes. That is ok
 			  f_close(FatFsFile);
-			  //HAL_I2S_DMAStop(&hi2s2);
-			  //HAL_UART_Transmit(&huart2,(uint8_t*)"MUSIC 10 PAUSE\r",15,1000);
 			  isEndOfFile = 1;
 #ifdef DEBUG
 			  printf("close1\r\n");
@@ -134,18 +126,11 @@ uint8_t streamAudioFile(FIL *FatFsFile, WAVaudioFile *WAVfile)
 
 	  if(updateFlag == UPDATE_UPPER){//fill upper half of the circular buffer
 		  f_read(FatFsFile, &dataBuffer, AUDIO_BUFFER_SIZE, &bytesRead);
+		  fillAudioBuffer(updateFlag, WAVfile);
 		  updateFlag = UPDATE_NONE;
-
-		  if(WAVfile->numberOfChannels == 2){ /*Need to make this for mono still*/
-			  for(i=0;i< AUDIO_BUFFER_SIZE / 2;i++){
-				  bigEndianData[i + (AUDIO_BUFFER_SIZE / 2)] = ((int16_t) ((dataBuffer[(i * 2) + 1] << 8) | (dataBuffer[(i * 2)])) >> volShift);
-			  }
-		  }
 
 		  if((bytesRead < AUDIO_BUFFER_SIZE)){ // this will cut off up to last 510 bytes. That is ok
 			  f_close(FatFsFile);
-			  //HAL_I2S_DMAStop(&hi2s2);
-			  //HAL_UART_Transmit(&huart2,(uint8_t*)"MUSIC 10 PAUSE\r",15,1000);
 			  isEndOfFile = 1;
 #ifdef DEBUG
 			  printf("close2\r\n");
@@ -154,6 +139,45 @@ uint8_t streamAudioFile(FIL *FatFsFile, WAVaudioFile *WAVfile)
 
 	  }
 	  return isEndOfFile;
+}
+
+void fillAudioBuffer(enum UpdateFlag_e bufferPos, WAVaudioFile *WAVfile)
+{
+	uint16_t bufferOffset;
+	uint16_t i;
+	if(bufferPos == UPDATE_LOWER){
+		bufferOffset = 0;
+	}
+	if(bufferPos == UPDATE_UPPER){
+		bufferOffset = AUDIO_BUFFER_SIZE / 2;
+	}
+
+	if(WAVfile->numberOfChannels == 1){
+		for(i=0;i<(AUDIO_BUFFER_SIZE / 2);i=i+2){
+			bigEndianData[i + bufferOffset] = ((int16_t) ((dataBuffer[(i * 2) + 1] << 8) | (dataBuffer[(i * 2)])) >> volShift);
+			bigEndianData[i + 1 + bufferOffset] = ((int16_t) ((dataBuffer[(i * 2) + 1] << 8) | (dataBuffer[(i * 2)])) >> volShift);
+		}
+	}
+#ifndef CONVERT_STEREO_TO_MONO
+	if(WAVfile->numberOfChannels == 2){
+		for(i=0;i<(AUDIO_BUFFER_SIZE / 2);i++){
+			bigEndianData[i + bufferOffset] = ((int16_t) ((dataBuffer[(i * 2) + 1] << 8) | (dataBuffer[(i * 2)])) >> volShift);
+		}
+	}
+#else
+	if(WAVfile->numberOfChannels ==2){ /*converts stero to mono*/
+		int16_t leftTempSample;
+		int16_t rightTempSample;
+		int16_t combinedTempSample;
+		for(i=0;i< AUDIO_BUFFER_SIZE / 2;i=i+2){
+			leftTempSample = (int16_t) ((dataBuffer[(i * 2) + 1] << 8) | (dataBuffer[(i * 2)]));
+			rightTempSample = (int16_t) ((dataBuffer[(i * 2) + 3] << 8) | (dataBuffer[(i * 2) + 2]));
+			combinedTempSample = ((int16_t) ((leftTempSample / 2) + (rightTempSample / 2)) >> volShift);
+			bigEndianData[i + bufferOffset] = combinedTempSample;
+			bigEndianData[i + 1 + bufferOffset] = combinedTempSample;
+		}
+	}
+#endif
 }
 
 void fileError(WAVaudioFile *WAVfile, enum WAVerror_e error)
@@ -170,7 +194,7 @@ void fileCheck(WAVaudioFile *WAVfile)
 
 	WAVerror = NO_ERROR;
 
-	if(WAVfile->audioFormat != 1){ //yes this will overwrite the previous one but hopefully there is only one error
+	if(WAVfile->audioFormat != 1){
 		WAVerror |= FORMAT_ERROR;
 	}
 

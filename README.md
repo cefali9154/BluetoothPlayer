@@ -117,8 +117,10 @@ The program was written in phases with testing at every point of development. An
 1. Work restarted once I acquired an oscilloscope. I was able to see that there was a periodic dropout in the transmission. I optimized the code and reconfigured the interrupt priorities. The transmission dropout disappeared but the audio was still crackling. Around this time I also recieved a different Bluetooth speaker. When tested with this, I got good quality audio except for a drop that happens every 10 seconds. I provide more information about this in the "Current Issues" section.
 1. DMA was successfully configured for I2S transmission. It was not entirely clear how to implement it with a circular buffer from the HAL manual, but trial and error along with significant googling provided an answer.
 1. Major refactoring of almost all of the code. To this point, this had been more of a test platform with poor coding practices. I rewrote most of it with good practices that were learned from reading through example code and high-profile open source projects to see how code is arranged in them.
-1. Implementation of a state machine to handle user inputs, BC127 configuration, pairing of new devices, and file navigation. So far everything is functional except for the navigation of files (previous and next). (This is the current step)
-1. Optimization of code. Updating for good practicies and cleaning up any leftover test/debugging code.
+1. Implementation of a state machine to handle user inputs, BC127 configuration, pairing of new devices, and file navigation.
+1. Implement error handling and the ability to accept multiple WAV configurations (e.g. mono or stereo). [Current Step]
+1. Implement LED controller to visually show important information about the device (battery status, connection status etc).
+1. Perform a final optimization of the code and decrease the clock speed as much as possible to increase battery life.
 
 ## Current Issues
 1. Every 10 seconds, the Bluetooth stream goes silent for a moment and then comes back. After observing the I2S signal, there is no issue with that, so there must be something going on with the actual Bluetooth connection between the BC127 and the speaker. My current theory is that the BC127 will only connect with the SBC codec when it is acting as a source. When I connect my phone to the speakers, it uses the AAC codec. I believe that the periodic drop is due to the speaker not being able to handle the SBC bitrate. I have contacted SierraWireless support regarding this but they have not been able to explain. Another issue I have is that when I configure the BC127 to use 44.1 KHz audio, it still connects to the speaker at 48 KHz. I have found posts from others online with this same issue but so far no one has had any answers. If I configure the BC127 to use 44.1 KHz audio, it will still connect at 48 KHz, but the audio will not cut out every 10 seconds. This is not a viable option though because the audio will be slowed down and there are frequent pops and crackles.
@@ -128,7 +130,10 @@ The program was written in phases with testing at every point of development. An
 1. The BC127 module has proven difficult to work with. I believe this can be attributed to the small user base and sometimes unclear documentation.
 1. A development board is a valuable investment and would save significant time in future projects.
 1. The HAL drivers are useful, but do not get too hung up on using them. Direct register access can be quicker and easier.
+1. If a new section of code is written and tested, clean it up before moving on (or write it properly in the first place, but when trying new things this can take too much time), or else the code ends up being messy later.
+1. In general I have gained a much better understanding of the operation of the microcontroller and organization and design of code.
 
 ## Future Work Ideas
 1. Redo the PCB layout with a 4-layer PCB. This should allow for size reduction and proper signal routing.
 1. Implement a discrete MP3 codec to decode MP3's. By allowing the use of MP3s, the file size would be significantly smaller. MP3s are also more common for music libraries.
+1. Allow the user to access the SD card via the micro USB port, which is currently only used for charging.

@@ -35,6 +35,7 @@ enum UpdateFlag_e{
 	UPDATE_LOWER
 };
 
+
 extern FIL FatFsFile;
 //extern WAVaudioFile WAVfile;
 
@@ -55,6 +56,7 @@ void findWAVFiles(void);
 void nextSong(void);
 void previousSong(void);
 void selectSong(WAVaudioFile *WAVfile);
+void fillAudioBuffer(enum UpdateFlag_e bufferPos, WAVaudioFile *WAVfile);
 
 
 #endif /* AUDIOFILE_H_ */
