@@ -109,13 +109,20 @@ uint8_t streamAudioFile(FIL *FatFsFile, WAVaudioFile *WAVfile)
 {
 	uint8_t isEndOfFile = 0;
 	UINT bytesRead;
+	uint8_t readDivisor;
+
+	if(WAVfile->numberOfChannels == 2){
+		readDivisor = 1;
+	}else{
+		readDivisor = 2;
+	}
 
 	  if(updateFlag == UPDATE_LOWER){ //fill lower half of the circular buffer
-		  f_read(FatFsFile, &dataBuffer, AUDIO_BUFFER_SIZE, &bytesRead);
+		  f_read(FatFsFile, &dataBuffer, AUDIO_BUFFER_SIZE / readDivisor, &bytesRead);
 		  fillAudioBuffer(updateFlag, WAVfile);
 		  updateFlag = UPDATE_NONE;
 
-		  if((bytesRead < AUDIO_BUFFER_SIZE)){ // this will cut off up to last 510 bytes. That is ok
+		  if((bytesRead < AUDIO_BUFFER_SIZE / readDivisor)){ // this will cut off up to last 510 bytes. That is ok
 			  f_close(FatFsFile);
 			  isEndOfFile = 1;
 #ifdef DEBUG
@@ -125,11 +132,11 @@ uint8_t streamAudioFile(FIL *FatFsFile, WAVaudioFile *WAVfile)
 	  }
 
 	  if(updateFlag == UPDATE_UPPER){//fill upper half of the circular buffer
-		  f_read(FatFsFile, &dataBuffer, AUDIO_BUFFER_SIZE, &bytesRead);
+		  f_read(FatFsFile, &dataBuffer, AUDIO_BUFFER_SIZE / readDivisor, &bytesRead);
 		  fillAudioBuffer(updateFlag, WAVfile);
 		  updateFlag = UPDATE_NONE;
 
-		  if((bytesRead < AUDIO_BUFFER_SIZE)){ // this will cut off up to last 510 bytes. That is ok
+		  if((bytesRead < AUDIO_BUFFER_SIZE / readDivisor)){ // this will cut off up to last 510 bytes. That is ok
 			  f_close(FatFsFile);
 			  isEndOfFile = 1;
 #ifdef DEBUG
@@ -154,8 +161,8 @@ void fillAudioBuffer(enum UpdateFlag_e bufferPos, WAVaudioFile *WAVfile)
 
 	if(WAVfile->numberOfChannels == 1){
 		for(i=0;i<(AUDIO_BUFFER_SIZE / 2);i=i+2){
-			bigEndianData[i + bufferOffset] = ((int16_t) ((dataBuffer[(i * 2) + 1] << 8) | (dataBuffer[(i * 2)])) >> volShift);
-			bigEndianData[i + 1 + bufferOffset] = ((int16_t) ((dataBuffer[(i * 2) + 1] << 8) | (dataBuffer[(i * 2)])) >> volShift);
+			bigEndianData[i + bufferOffset] = ((int16_t) ((dataBuffer[i + 1] << 8) | (dataBuffer[i])) >> volShift);
+			bigEndianData[i + 1 + bufferOffset] = bigEndianData[i + bufferOffset];
 		}
 	}
 #ifndef CONVERT_STEREO_TO_MONO
