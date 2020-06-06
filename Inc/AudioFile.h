@@ -35,14 +35,15 @@ enum UpdateFlag_e{
 	UPDATE_LOWER
 };
 
+
 extern FIL FatFsFile;
-extern WAVaudioFile WAVfile;
+//extern WAVaudioFile WAVfile;
 
 //Prototypes
 void initializeAudioFile(FIL *FatFsFile, WAVaudioFile *WAVfile);
-void fileError(WAVaudioFile *WAVfile, enum WAVerror_e);
+void fileError(WAVaudioFile *WAVfile, enum WAVerror_e error);
 void fileCheck(WAVaudioFile *WAVfile);
-void streamAudioFile(FIL *FatFsFile, WAVaudioFile *WAVfile);
+uint8_t streamAudioFile(FIL *FatFsFile, WAVaudioFile *WAVfile);
 void startStream(void);
 void volumeDown(void);
 void volumeUp(void);
@@ -54,7 +55,8 @@ void stopStream(void);
 void findWAVFiles(void);
 void nextSong(void);
 void previousSong(void);
-void selectSong(void);
+void selectSong(WAVaudioFile *WAVfile);
+void fillAudioBuffer(enum UpdateFlag_e bufferPos, WAVaudioFile *WAVfile);
 
 
 #endif /* AUDIOFILE_H_ */

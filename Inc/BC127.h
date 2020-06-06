@@ -31,7 +31,7 @@ typedef enum {
 	PAIR_ERROR
 }bc127Notification_e;
 
-extern bc127Notification_e Notification;
+//extern bc127Notification_e Notification;
 
 typedef enum {
 	NOT_READY,
@@ -43,16 +43,18 @@ typedef enum {
 	NOT_PLAYING
 }bc127Status_e;
 
-extern bc127Status_e Status;
+//extern bc127Status_e Status;
 
 typedef struct{
 	char bluetoothAddress[12];
 	uint8_t notification;
-	uint8_t status;
+	uint8_t connectionStatus;
+	uint8_t batteryStatus;
+	uint8_t playStatus;
 } bc127Device_t;
 
-void bc127SendCommand(enum bc127Command_e command);
-void bc127Read(void);
+void bc127SendCommand(bc127Device_t *bc127, enum bc127Command_e command);
+void bc127Read(bc127Device_t *bc127);
 void bc127UartHandler(void);
 
 #define DATA 1

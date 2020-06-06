@@ -66,11 +66,11 @@ void checkButtonPresses(void)
 				break;
 			case S6_Pin:
 				printf("Button 6 Pressed\r\n");
-				volumeUp();
+				volumeDown();
 				break;
 			case S7_Pin:
 				printf("Button 7 Pressed\r\n");
-				volumeDown();
+				volumeUp();
 				break;
 		}
 	}
