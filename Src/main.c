@@ -62,6 +62,7 @@
 #include "userInputs.h"
 #include "stm32l0xx_hal.h"
 #include "states.h"
+#include "LEDControl.h"
 
 /* USER CODE END Includes */
 
@@ -106,6 +107,7 @@ static void MX_I2S2_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM2_Init(void);
+static void ADC_Init(void);
 
 /* USER CODE BEGIN PFP */
 
@@ -138,10 +140,6 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   HAL_GPIO_WritePin(GPIOA,BT_RST_Pin,GPIO_PIN_SET); //this may be too late, may have to move this up as early as possible
@@ -152,27 +150,15 @@ int main(void)
   MX_USART2_UART_Init();
   MX_FATFS_Init();
   MX_TIM2_Init();
+  ADC_Init();
 
   /* USER CODE BEGIN 2 */
   timedStartup();
-
-  //getConfig();
-  //TODO:
-  /*
-   * get total count of .wav files
-   * go to find first file
-   * if normal mode then F_findNext()
-   * if shuffle then rand(total files ct)
-   * janky but if rand generates val of 75 we go to first and then findnext for 74 iterations
-   * keep running log of last 25 or something (up to 127 b/c of uint8_t)
-   */
-
+  sdInit();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  sdInit();
-
   while (1)
   {
     /* USER CODE END WHILE */
@@ -180,22 +166,13 @@ int main(void)
     /* USER CODE BEGIN 3 */
 	  runStates(&WAVfile, &bc127Device);
 
-	  if(HAL_GetTick() < initTickCount + 100){
-	  HAL_TIM_PWM_Start_IT(&htim2,TIM_CHANNEL_1);
-	  }
+	  LEDBlinkControl(&bc127Device);
 
-	  if(HAL_GetTick() > initTickCount + 100){
-	  HAL_TIM_PWM_Stop_IT(&htim2,TIM_CHANNEL_1);
-	  }
 
-	  if(HAL_GetTick() > initTickCount + 200){
-		  initTickCount = HAL_GetTick();
 
-		  if(HAL_GPIO_ReadPin(GPIOB,BTN_READ_Pin) == GPIO_PIN_RESET){
+	  if(HAL_GPIO_ReadPin(GPIOB,BTN_READ_Pin) == GPIO_PIN_RESET){
 			 HAL_GPIO_WritePin(GPIOB,PWR_CTRL_Pin,GPIO_PIN_RESET);
-		  }
 	  }
-
 
 	  usartHandler();
 	  bc127UartHandler();
@@ -305,8 +282,6 @@ static void MX_TIM2_Init(void)
   TIM_OC_InitTypeDef sConfigOC = {0};
 
   /* USER CODE BEGIN TIM2_Init 1 */
-
-  //set prescaler to 0 w/ 799 period for 10kHz timer
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
@@ -537,6 +512,16 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+void ADC_Init(void)
+{/*
+	hadc1.Init = ADC;
+	hadc1.
+
+  if (HAL_ADC_Init(&hadc1) != HAL_OK)
+  {
+	Error_Handler();
+  }*/
+}
 void usartHandler(void)
 {
 	if(usart1data)

@@ -20,6 +20,8 @@ TIM_HandleTypeDef htim2;
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
+ADC_HandleTypeDef hadc1;
+
 
 int _write(int file, char *data, int len)
 {
